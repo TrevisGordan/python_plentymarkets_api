@@ -245,3 +245,7 @@ REQUIRED_FIELDS_MAP = {
     'attribute_values': REQUIRED_ATTRIBUTE_VALUE_FIELDS,
     'transaction': REQUIRED_TRANSACTION_FIELDS
 }
+
+# To dump raw data or documents from plenty BI, we cannot handle the response as JSON.
+# To determinate if we can download a file, we use the content-type
+DUMPABLE_CONTENT_TYPES = ['application/gzip']

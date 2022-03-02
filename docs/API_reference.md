@@ -33,6 +33,7 @@
         * [get contact data](#get-contacts)
     + [Plenty BI related data](#get-bi-section)
 		* [get BI rawfile-list](#get-bi)
+		* [dump BI rawfiles]  (#dump-bi)
 - [POST-Requests](#post-requests)
     + [Item related data](#post-items-section)
         * [post image avaialability](#post-image-availability)
@@ -568,7 +569,7 @@ The 'dataframe' format transforms that data structure into a pandas DataFrame, w
 
 ##### plenty_api_get_bi_raw_files <a name='get-bi'></a>
 
-Get a list of BI raw data files.
+Get a list of BI raw data files. Use `plenty_api_dump_bi_raw_file` to download the files.
 More information in the [PlentyMarkets documentation](https://knowledge.plentymarkets.com/en/slp/business-entscheidungen/plenty-bi/reports/reports-verwalten).
 
 [*Optional parameter*]:
@@ -613,6 +614,24 @@ refine={'pages':{'start_page':3}}  # [3:]
 There are currently two supported output formats: 'json' and 'dataframe'.  
 The 'json' format simply returns the raw response, without page information and with multiple pages combined into a single data structure.  
 The 'dataframe' format transforms that data structure into a pandas DataFrame, which contains subparts in json, that can be split further by the user application.
+
+##### plenty_api_dump_bi_raw_file  <a name='dump-bi'></a>
+
+Dumps raw BI files from Plentymarkets. The remote file paths have to be previously fetched with `plenty_api_get_bi_raw_files`.
+
+[*Required parameter:*]:
+
+The **remote_files** field determines the path to the raw data.
+This can be a string, a list of strings or a dict (e.g. the returned data from `plenty_api_get_bi_raw_files`)
+
+[*Optional parameter*]:
+
+The local download directory can be specified with **download_directory**. By default the files will be dumped into your current directory.
+If the directory doesn't exist it will be created automatically.
+
+[*Output format*]:
+
+This method returns the list of paths to the downloaded files.
 
 ### POST requests: <a name='post-requests'></a>
 

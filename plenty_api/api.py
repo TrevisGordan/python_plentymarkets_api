@@ -18,6 +18,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+from pathlib import Path
 import time
 from typing import Dict, List, Union
 import requests
@@ -32,7 +33,7 @@ from datetime import datetime, timezone, date, timedelta
 import plenty_api.keyring
 import plenty_api.utils as utils
 from plenty_api.constants import (
-    IMPORT_ORDER_DATE_TYPES, ORDER_TYPES, VALID_LANGUAGES
+    IMPORT_ORDER_DATE_TYPES, ORDER_TYPES, VALID_LANGUAGES, DUMPABLE_CONTENT_TYPES
 )
 
 
@@ -84,6 +85,8 @@ class PlentyApi():
         **plenty_api_get_shipping_package_items**
 
         **plenty_api_get_shipping_packages_for_order**
+
+        **plenty_api_dump_bi_raw_file**
 
         **plenty_api_get_bi_raw_files**
 
@@ -508,6 +511,67 @@ class PlentyApi():
                                            data_format=self.data_format)
 
         return orders
+
+    def plenty_api_dump_bi_raw_file(
+        self, remote_files: Union[str, dict, list],
+        download_directory: Path = Path('.')
+    ) -> List[Union[Path, None]]:
+        """
+        Dumping BI raw data to file.
+
+        Parameter:
+
+            remote_files[str, dict, list]   -   BI files to download
+                                                determines the path to the raw
+                                                data this can be a string, a
+                                                list of strings or a dict (e.g.
+                                                the response from
+                                                `plenty_api_get_bi_raw_files`)
+        OPTIONAL
+            download_directory  [Path]      -   Local filepath to store the data
+                                                default is the current directory.
+                                                Automatically created when not
+                                                found.
+
+        Return:
+                                [list]      -   list of paths to downloaded files
+        """
+        if isinstance(remote_files, str):
+            remote_files = [remote_files]
+
+        response_list = []
+        for remote_file in remote_files:
+            remote_file_path_query = None
+            # if a response from plenty_api_get_bi_raw_files was passed, extract path
+            if isinstance(remote_file, dict) and 'path' in remote_file:
+                remote_file_path_query = Path(remote_file['path'])
+
+            if isinstance(remote_file, str):
+                remote_file_path_query = Path(remote_file)
+
+            if not remote_file_path_query:
+                logging.warning(
+                    f'validation error - invalid path query ({remote_file}) for'
+                    'BI files. Required is either a single path, a list of'
+                    'paths or a the response format of'
+                    '`plenty_api_get_bi_raw_files`.'
+                )
+                response_list.append(None)
+                continue
+            response = self.__plenty_api_request(
+                method='get', domain='bi_raw', path='/file',
+                query={'path':remote_file_path_query}
+            )
+            if isinstance(response, bytes):
+                download_directory.mkdir(parents=True, exist_ok=True)
+                file_destination = download_directory / remote_file_path_query.name
+                with open(file_destination, "wb") as requested_file:
+                        requested_file.write(response)
+                        response_list.append(file_destination)
+            else:
+                response_list.append(None)
+                logging.error('Failed to fetch {}'.format(remote_file_path_query))
+        return response_list
 
     def plenty_api_get_bi_raw_files(self, refine: dict = None, query: dict = None) -> list:
         """
