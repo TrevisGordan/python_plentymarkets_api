@@ -121,7 +121,7 @@ VALID_REFINE_KEYS = {
     ],
     'bi_raw': [
         'dataName', 'processStatus', 'createdAtTimestamp', 'sortOrder',
-        'itemsPerPage'
+        'itemsPerPage', 'pages'
     ]
 }
 

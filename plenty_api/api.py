@@ -379,7 +379,18 @@ class PlentyApi():
             return response
 
         page_info = utils.sniff_response_format(response=response, query=query)
-        entries = response[page_info['data']]
+        # Handle page slices (custom selection of pages)
+        slice_start = ''
+        slice_end = ''
+        if 'pages' in query:
+            pages = query['pages']
+            slice_start = pages['start_page'] if 'start_page' in pages else ''
+            slice_end = pages['end_page'] if 'end_page' in pages else ''
+            logging.debug(f"Using page slice [{slice_start}:{slice_end}]")
+        if slice_start and slice_start >= 2:
+            entries = []
+        else:
+            entries = response[page_info['data']]
 
         if self.cli_progress_bar and page_info['last_page']:
             pbar = None
@@ -398,6 +409,10 @@ class PlentyApi():
                 page = page + 1
             query.update({'page': page})
 
+            if slice_end and page > slice_end:
+                # Skip requests for pages after the end of the slice
+                break
+
             response = self.__plenty_api_request(method='get',
                                                  domain=domain,
                                                  path=path,
@@ -408,6 +423,10 @@ class PlentyApi():
             if isinstance(response, dict) and 'error' in response.keys():
                 logging.error(f"subsequent {domain} API requests failed.")
                 return response
+
+            if slice_start and page < slice_start:
+                # Skip pages before the beginning of the slice
+                continue
 
             entries += response[page_info['data']]
 
