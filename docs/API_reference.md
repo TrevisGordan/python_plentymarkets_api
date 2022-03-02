@@ -31,6 +31,8 @@
         * [get warehouses for a variation](#get-warehouses)
     + [Contact data (CRM)](#get-contact-section)
         * [get contact data](#get-contacts)
+    + [Plenty BI related data](#get-bi-section)
+		* [get BI rawfile-list](#get-bi)
 - [POST-Requests](#post-requests)
     + [Item related data](#post-items-section)
         * [post image avaialability](#post-image-availability)
@@ -557,6 +559,56 @@ Use the **additional** field to add more values to the response, valid values ar
 addresses, accounts, options, orderSummary, primaryBillingAddress, contactOrders
 
 [*Output format*]:
+
+There are currently two supported output formats: 'json' and 'dataframe'.  
+The 'json' format simply returns the raw response, without page information and with multiple pages combined into a single data structure.  
+The 'dataframe' format transforms that data structure into a pandas DataFrame, which contains subparts in json, that can be split further by the user application.
+
+#### Plenty BI related data <a name='get-bi-section'></a>
+
+##### plenty_api_get_bi_raw_files <a name='get-bi'></a>
+
+Get a list of BI raw data files.
+More information in the [PlentyMarkets documentation](https://knowledge.plentymarkets.com/en/slp/business-entscheidungen/plenty-bi/reports/reports-verwalten).
+
+[*Optional parameter*]:
+
+The **refine** field can be used to reduce the request by applying certain filters, valid values are:
+
+ - *dataName* (Filter that restricts the search result to raw data files ([Available options](https://knowledge.plentymarkets.com/en/slp/business-entscheidungen/plenty-bi/reports/datenformate)))
+ - *createdAtTimestamp* (UNIX-Timestamp from when daily generated raw data
+   are to be filtered.)
+ - *processStatus*  (Current process status, the status is only changed
+   by internal processing.  itemsPerPage (The number of raw data
+   files to be returned. This library uses a default value of 100
+   instead of 20, which is the default for the REST API.)
+ - *sortOrder* (Defines the sort    order, possible values are: asc, desc)
+   page (Page)
+
+For custom slicing, the `pages` refine parameter can be used:
+[*Examples*]:
+```python
+refine={'pages':{'start_page':1, 'end_page':5}}  # [1:5]
+refine={'pages':{'end_page':3}}  # [:3]
+refine={'pages':{'start_page':3}}  # [3:]
+```
+
+[*Output format*]:
+
+[*Example*]:
+```python
+{
+  'cloudId': 10,
+  'createdAt': '2022-02-28 23:48:17+01',
+  'dataCreatedAt': '2022-02-28 00:00:00',
+  'dataName': 'orders',
+  'id': '12345678-9123-4567-8912-345678912345',
+  'path': 'report/rawData/orders/1234/2022/2/orders--2022-02-28--p1--v7.csv.gz',
+  'plentyIdHash': 'abcdefghijkl',
+  'processStatus': 'processed',
+  'shouldProcess': 1
+}
+```
 
 There are currently two supported output formats: 'json' and 'dataframe'.  
 The 'json' format simply returns the raw response, without page information and with multiple pages combined into a single data structure.  

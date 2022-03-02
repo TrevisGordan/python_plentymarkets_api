@@ -85,6 +85,8 @@ class PlentyApi():
 
         **plenty_api_get_shipping_packages_for_order**
 
+        **plenty_api_get_bi_raw_files**
+
         POST REQUESTS
         **plenty_api_set_image_availability**
 
@@ -331,6 +333,11 @@ class PlentyApi():
             time.sleep(3)
 
         logging.debug(f"request url: {raw_response.request.url}")
+
+        # if the response is a file, return raw content, so it can be written to a file
+        if raw_response.headers['Content-Type'] in DUMPABLE_CONTENT_TYPES:
+            return raw_response.content
+
         try:
             response = raw_response.json()
         except simplejson.errors.JSONDecodeError:
@@ -371,17 +378,26 @@ class PlentyApi():
                 isinstance(response, list)):
             return response
 
-        page_info = utils.sniff_response_format(response=response)
+        page_info = utils.sniff_response_format(response=response, query=query)
         entries = response[page_info['data']]
 
-        if self.cli_progress_bar:
+        if self.cli_progress_bar and page_info['last_page']:
             pbar = None
             if not page_info['end_condition'](response):
                 pbar = tqdm.tqdm(desc=f'Plentymarkets {domain} request',
                                  total=response[page_info['last_page']])
+        elif self.cli_progress_bar and not page_info['last_page']:
+            logging.warn(f"Response for {domain} has no pagination, unable to detect the number of pages.")
 
+        page = 1
         while not page_info['end_condition'](response):
-            query.update({'page': response[page_info['page']] + 1})
+            # Count from 1 onward if the response has no pagination
+            if page_info['page']:
+                page = response[page_info['page']] + 1
+            else:
+                page = page + 1
+            query.update({'page': page})
+
             response = self.__plenty_api_request(method='get',
                                                  domain=domain,
                                                  path=path,
@@ -399,7 +415,7 @@ class PlentyApi():
                 if pbar:
                     pbar.update(1)
 
-        if self.cli_progress_bar:
+        if self.cli_progress_bar and page_info['last_page']:
             if pbar:
                 pbar.close()
 
@@ -473,6 +489,39 @@ class PlentyApi():
                                            data_format=self.data_format)
 
         return orders
+
+    def plenty_api_get_bi_raw_files(self, refine: dict = None, query: dict = None) -> list:
+        """
+        Get a list of BI-Rawdata files
+
+        Parameters:
+            refine              [dict]      -   Refine arguments for the BI
+            query               [dict]      -   Query arguments e.g. page-slicing
+
+        Return:
+                        [JSON(Dict) / DataFrame] <= self.data_format
+        """
+        query = utils.sanity_check_parameter(domain='bi_raw',
+                                             query=query,
+                                             refine=refine,
+                                             additional=None)
+
+        # Prefer 100 items per page over the default of 20
+        if 'itemsPerPage' not in query:
+            query.update({'itemsPerPage':100})
+
+        bi_files = self.__repeat_get_request_for_all_records(domain='bi_raw',
+                                                             query=query)
+
+        if isinstance(bi_files, dict) and 'error' in bi_files.keys():
+            logging.error("GET BI-Rawfile list failed with:\n"
+                          f"{bi_files}")
+            return None
+
+        bi_files = utils.transform_data_type(data=bi_files,
+                                           data_format=self.data_format)
+
+        return bi_files
 
     def plenty_api_get_pending_redistribution(
         self, order_id: int = 0, sender: int = 0, receiver: int = 0,

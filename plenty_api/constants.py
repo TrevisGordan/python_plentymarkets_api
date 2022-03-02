@@ -37,7 +37,8 @@ VALID_DOMAINS = [
     'vat',
     'warehouses',
     'property',
-    'v2property'
+    'v2property',
+    'bi_raw'
 ]
 VALID_ROUTES = [
     '/rest/items/attributes',
@@ -54,7 +55,8 @@ VALID_ROUTES = [
     '/rest/vat',
     '/rest/stockmanagement/warehouses',
     '/rest/properties',
-    '/rest/v2/properties'
+    '/rest/v2/properties',
+    '/rest/bi/raw-data'
 ]
 DOMAIN_ROUTE_MAP = dict(zip(VALID_DOMAINS, VALID_ROUTES))
 
@@ -116,6 +118,10 @@ VALID_REFINE_KEYS = {
     ],
     'property': [
         'propertyId'
+    ],
+    'bi_raw': [
+        'dataName', 'processStatus', 'createdAtTimestamp', 'sortOrder',
+        'itemsPerPage'
     ]
 }
 

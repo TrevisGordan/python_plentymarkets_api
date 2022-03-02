@@ -186,7 +186,7 @@ def get_route(domain: str) -> str:
     return ''
 
 
-def sniff_response_format(response: dict) -> dict:
+def sniff_response_format(response: dict, query: dict) -> dict:
     """
     Identify the type of response format to iterate through it with the correct
     keys.
@@ -196,7 +196,8 @@ def sniff_response_format(response: dict) -> dict:
 
     Parameter:
         response                [dict]      -   GET request response body
-
+        query                   [dict]      -   Dictionary used for the params
+                                                field for the requests module.
     Returns:
                                 [dict]      -   Mapping of elements used for
                                                 iterating through the response
@@ -217,6 +218,17 @@ def sniff_response_format(response: dict) -> dict:
             'end_condition': lambda x: x['isLastPage'],
             'last_page': 'lastPageNumber'
         }
+    # BI file list doesn't have proper pagination
+    if 'searchResult' in response:
+        return {
+            'page': None,
+            'data': 'searchResult',
+            # Last page will contain less entries than expected
+            'end_condition': lambda x: len(x['searchResult']) < query['itemsPerPage'],
+            # Unknown, causes deactivation of the progress bar
+            'last_page': None
+        }
+
     raise RuntimeError("Unsupported response format\n{response}")
 
 def get_language(lang: str) -> str:
