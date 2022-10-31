@@ -1313,13 +1313,12 @@ class PlentyApi():
     def plenty_api_get_amazon_product_types(self):
         """
         Get a list of all available Amazon product types.
-        https://developers.plentymarkets.com/en-gb/plentymarkets-rest-api/index.html#/Pim/get_rest_pim_amazon_product_types
+
         Return:
                         [JSON(Dict) / DataFrame] <= self.data_format
         """
-        domain = 'pim' # pim is the REST Route not the domain
-        path = '/amazon-product-types' # path in this case is the endpoint
-        return self.__plenty_api_generic_get(domain='pim', path=path)
+        return self.__plenty_api_generic_get(domain='pim',
+                                             path='/amazon-product-types')
 
 # POST REQUESTS
 

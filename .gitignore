@@ -11,9 +11,6 @@ images/
 playground/
 
 # CONFIG FILES
-mensa_config.py
-app/api/data/
-app/api/dummydata/speiseplan
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -124,9 +121,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
