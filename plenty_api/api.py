@@ -29,6 +29,7 @@ import tqdm
 import pandas
 from collections import defaultdict
 from datetime import datetime, timezone, date, timedelta
+from json.decoder import JSONDecodeError
 
 import plenty_api.keyring
 import plenty_api.utils as utils
@@ -252,11 +253,17 @@ class PlentyApi():
         response = requests.post(endpoint, params=creds)
         if response.status_code == 403:
             logging.error(
-                "ERROR: Login to API failed: your account is locked\n"
+                "Login to API failed: your account is locked\n"
                 "unlock @ Setup->settings->accounts->{user}->unlock login"
             )
         try:
             token = utils.build_login_token(response_json=response.json())
+        except JSONDecodeError:
+            logging.error(
+                "Plentymarkets API refuses to grant a login token."
+                "(Possible reason: Too many users logged in)"
+            )
+            return False
         except KeyError:
             try:
                 if (
