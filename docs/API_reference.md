@@ -34,6 +34,8 @@
     + [Plenty BI related data](#get-bi-section)
 		* [get BI rawfile-list](#get-bi)
 		* [dump BI rawfiles]  (#dump-bi)
+    + [Plenty PIM related data](#get-pim-section)
+        * [get amazon_product_types](#get-amazon-product-types)
 - [POST-Requests](#post-requests)
     + [Item related data](#post-items-section)
         * [post image avaialability](#post-image-availability)
@@ -632,6 +634,16 @@ If the directory doesn't exist it will be created automatically.
 [*Output format*]:
 
 This method returns the list of paths to the downloaded files.
+
+#### Plenty PIM related data <a name='get-pim-section'></a>
+
+##### plenty_api_get_amazon_product_types <a name='get-amazon-product-types'></a>
+
+GET '​/rest​/pim​/amazon-product-types'
+
+Gets a list of all amazon product types. Use `plenty_api_get_amazon_product_types` to to retrieve the list.
+More information in the [PlentyMarkets documentation](https://developers.plentymarkets.com/en-gb/plentymarkets-rest-api/index.html#/Pim/get_rest_pim_amazon_product_types).
+
 
 ### POST requests: <a name='post-requests'></a>
 

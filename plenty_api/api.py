@@ -91,6 +91,8 @@ class PlentyApi():
 
         **plenty_api_get_bi_raw_files**
 
+        **plenty_api_get_amazon_product_types**
+
         POST REQUESTS
         **plenty_api_set_image_availability**
 
@@ -1314,6 +1316,16 @@ class PlentyApi():
 
         return utils.summarize_shipment_packages(
             response=package_responses, mode=mode)
+
+    def plenty_api_get_amazon_product_types(self):
+        """
+        Get a list of all available Amazon product types.
+
+        Return:
+                        [JSON(Dict) / DataFrame] <= self.data_format
+        """
+        return self.__plenty_api_generic_get(domain='pim',
+                                             path='/amazon-product-types')
 
 # POST REQUESTS
 
